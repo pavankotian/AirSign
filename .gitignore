@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+.venv/
+venv_*/
+
+.vscode/
+
+data/landmarks/*.csv
+perception/gesture/models/*.joblib
