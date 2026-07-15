@@ -1,0 +1,38 @@
+{
+  "camera": {
+    "device_index": 0,
+    "resolution": [640, 480],
+    "target_fps": 30
+  },
+  "filter": {
+    "mincutoff": 1.0,
+    "beta": 0.007,
+    "dcutoff": 1.0
+  },
+  "tracking": {
+    "sensitivity": 0.85,
+    "pinch_tolerance": 0.15,
+    "active_zone": {
+      "x1": 0.05,
+      "y1": 0.05,
+      "x2": 0.95,
+      "y2": 0.95
+    }
+  },
+  "bindings": {
+    "PINCH_RELEASED": "left_click",
+    "DOUBLE_PINCH": "right_click",
+    "PINCH_HELD": "mouse_drag",
+    "SWIPE_LEFT": "prev_slide",
+    "SWIPE_RIGHT": "next_slide",
+    "SWIPE_UP": "volume_up",
+    "SWIPE_DOWN": "volume_down",
+    "FIST_ENTER": "scroll_mode",
+    "THUMBS_UP": "media_play_pause"
+  },
+  "ui": {
+    "theme": "dark",
+    "graph_window_size": 150,
+    "show_raw_landmarks": true
+  }
+}

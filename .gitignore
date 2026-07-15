@@ -9,3 +9,35 @@ venv_*/
 
 data/landmarks/*.csv
 perception/gesture/models/*.joblib
+
+# -------------------------------
+# Python
+# -------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# SQLite
+airsign_session.db
+
+# IDE
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local documents
+AIRSIGN_DEV_B_MASTER_SPEC.md
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/

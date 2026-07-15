@@ -1,0 +1,12 @@
+PyQt6==6.7.0
+PyQt6-Qt6==6.7.0
+PyQt6-sip==13.6.0
+pyqtgraph==0.13.7
+pynput==1.7.6
+pyautogui==0.9.54
+pystray==0.19.5
+Pillow==10.3.0
+screeninfo==0.8.1
+reportlab==4.2.0
+pytest==8.2.0
+pytest-qt==4.4.0
