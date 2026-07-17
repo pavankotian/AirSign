@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, Optional
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QHBoxLayout,
     QLabel,
     QMainWindow,
     QSplitter,
@@ -35,8 +34,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_WINDOW_WIDTH = 1216
-_DEFAULT_WINDOW_HEIGHT = 765
+_DEFAULT_WINDOW_WIDTH = 1600
+_DEFAULT_WINDOW_HEIGHT = 900
 
 
 class MainWindow(QMainWindow):
@@ -45,13 +44,20 @@ class MainWindow(QMainWindow):
     Constructs a single :class:`~ui.signals.AppSignals` instance and
     exposes it via :attr:`app_signals` so that background threads
     (such as ``ActionThread``, constructed elsewhere) can be given a
-    reference to emit on. The window lays out a
-    :class:`~ui.video_panel.VideoPanel` on the left and, on the right,
-    a :class:`~ui.gesture_panel.GesturePanel` above a ``QTabWidget``
-    containing a "Graph" tab
-    (:class:`~ui.smoothing_graph.SmoothingGraph`) and a "Settings" tab
-    (:class:`~ui.settings_panel.SettingsPanel`). A status bar displays
-    live FPS, hand-detection status, and the current FSM state.
+    reference to emit on.
+
+    The layout is camera-first, in the style of a computer-vision
+    debugging tool: a full-width
+    :class:`~ui.gesture_panel.GesturePanel` strip (state, gesture,
+    confidence, and the recent event log) sits at the top so those
+    values are always visible; below it, a horizontal splitter gives
+    the :class:`~ui.video_panel.VideoPanel` the majority of the
+    width, with the :class:`~ui.smoothing_graph.SmoothingGraph` beside
+    it as a secondary, always-visible telemetry panel; a ``QTabWidget``
+    holding only the "Settings" tab
+    (:class:`~ui.settings_panel.SettingsPanel`) sits at the bottom. A
+    status bar displays live FPS, hand-detection status, and the
+    current FSM state.
 
     No colors are hardcoded anywhere in this class, so an external
     stylesheet (for example, a dark theme ``.qss`` file) can be applied
@@ -101,25 +107,59 @@ class MainWindow(QMainWindow):
         logger.info("MainWindow initialized")
 
     def _build_layout(self) -> None:
-        """Assembles the video panel, gesture panel, and tab widget."""
+        """Assembles the camera-first, CV-tool-style window layout.
+
+        A full-width gesture panel sits on top so state, gesture,
+        confidence, and the recent event log are always visible. Below
+        it, a horizontal splitter gives the video panel roughly
+        60-70% of the width, with the smoothing graph beside it as a
+        secondary, always-visible panel. A tab widget holding only the
+        "Settings" tab sits at the bottom.
+
+        ``setStretchFactor`` alone only governs how *extra* space is
+        redistributed on a later resize; it does not determine the
+        splitters' first-shown proportions, which Qt otherwise derives
+        from each child widget's size hint. Since ``SmoothingGraph``'s
+        pyqtgraph plots and ``SettingsPanel``'s form layout both
+        report large size hints, an explicit initial ``setSizes`` call
+        (proportional to the window's own default size, not an
+        arbitrary constant) is required so the camera feed is
+        genuinely dominant from the moment the window first appears;
+        stretch factors then keep that same proportion on every
+        subsequent resize.
+        """
+        camera_graph_splitter = QSplitter(Qt.Orientation.Horizontal)
+        camera_graph_splitter.addWidget(self.video_panel)
+        camera_graph_splitter.addWidget(self.smoothing_graph)
+        camera_graph_splitter.setStretchFactor(0, 2)
+        camera_graph_splitter.setStretchFactor(1, 1)
+        camera_graph_splitter.setChildrenCollapsible(False)
+        camera_graph_splitter.setSizes(
+            [round(_DEFAULT_WINDOW_WIDTH * 0.72), round(_DEFAULT_WINDOW_WIDTH * 0.28)]
+        )
+
         tab_widget = QTabWidget()
-        tab_widget.addTab(self.smoothing_graph, "Graph")
         tab_widget.addTab(self.settings_panel, "Settings")
 
-        right_panel = QWidget()
-        right_layout = QVBoxLayout(right_panel)
-        right_layout.addWidget(self.gesture_panel)
-        right_layout.addWidget(tab_widget)
-
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.addWidget(self.video_panel)
-        splitter.addWidget(right_panel)
-        splitter.setStretchFactor(0, 3)
-        splitter.setStretchFactor(1, 2)
+        main_splitter = QSplitter(Qt.Orientation.Vertical)
+        main_splitter.addWidget(self.gesture_panel)
+        main_splitter.addWidget(camera_graph_splitter)
+        main_splitter.addWidget(tab_widget)
+        main_splitter.setStretchFactor(0, 0)
+        main_splitter.setStretchFactor(1, 1)
+        main_splitter.setStretchFactor(2, 0)
+        main_splitter.setChildrenCollapsible(False)
+        main_splitter.setSizes(
+            [
+                round(_DEFAULT_WINDOW_HEIGHT * 0.15),
+                round(_DEFAULT_WINDOW_HEIGHT * 0.70),
+                round(_DEFAULT_WINDOW_HEIGHT * 0.15),
+            ]
+        )
 
         central_widget = QWidget()
-        central_layout = QHBoxLayout(central_widget)
-        central_layout.addWidget(splitter)
+        central_layout = QVBoxLayout(central_widget)
+        central_layout.addWidget(main_splitter)
         self.setCentralWidget(central_widget)
 
     def _build_status_bar(self) -> None:
