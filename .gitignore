@@ -6,6 +6,3 @@ __pycache__/
 venv_*/
 
 .vscode/
-
-data/landmarks/*.csv
-perception/gesture/models/*.joblib
