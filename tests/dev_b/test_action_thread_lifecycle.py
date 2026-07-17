@@ -240,12 +240,12 @@ def test_exception_inside_handle_result_does_not_crash_thread(
     stop_event = threading.Event()
     thread = _make_thread(dependencies, _FakeQueue(items=[{"bad": "result"}]), stop_event)
 
-    original_handle_result = thread._handle_result
+    original_process_result = thread._process_result
 
-    def _raising_handle_result(result: Any) -> None:
+    def _raising_process_result(result: Any) -> None:
         raise RuntimeError("simulated handler failure")
 
-    thread._handle_result = _raising_handle_result  # type: ignore[method-assign]
+    thread._process_result = _raising_process_result  # type: ignore[method-assign]
 
     thread.start()
     time.sleep(0.15)
@@ -253,7 +253,7 @@ def test_exception_inside_handle_result_does_not_crash_thread(
 
     thread.stop()
     assert thread.isFinished() is True
-    assert original_handle_result is not None
+    assert original_process_result is not None
 
 
 def test_thread_finishes(dependencies: dict[str, Any]) -> None:
